@@ -1,15 +1,20 @@
 package spring_lesson_one.com.example.demo.service;
 
-import spring_lesson_one.com.example.demo.jpa.Product;
+import spring_lesson_one.com.example.demo.dto.ProductCreateDTO;
+import spring_lesson_one.com.example.demo.dto.ProductDTO;
+import spring_lesson_one.com.example.demo.dto.ProductUpdateDTO;
 
 import java.util.List;
 
 public interface ProductService {
-  List<Product> findAll();
+  List<ProductDTO> findAll();
 
-  Product findById(long id);
+  ProductDTO findById(long id);
 
-  Product create(Product product);
+  ProductDTO create(ProductCreateDTO productCreateDTO);
 
   void delete(long id);
+
+  ProductDTO update(Long id, ProductUpdateDTO productUpdateDTO);
+
 }
