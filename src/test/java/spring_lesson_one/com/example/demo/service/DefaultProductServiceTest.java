@@ -24,53 +24,76 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest(classes = DemoApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class DefaultProductServiceTest extends ContainerEnvironment {
   @Autowired
-  DefaultProductService defaultProductService;
+  ProductService productService;
 
   @Test
   void createProduct() {
-    var productCreateDTO = new ProductCreateDTO();
-    productCreateDTO.setName("Product");
-    productCreateDTO.setPrice(BigDecimal.valueOf(10.0));
-    ProductDTO createdProduct = defaultProductService.create(productCreateDTO);
-    assertEquals("Product", createdProduct.getName());
-    assertEquals(BigDecimal.valueOf(10.0), createdProduct.getPrice());
+    var productCreateDTO = productService.create(ProductCreateDTO.createBuilder()
+      .name("Product")
+      .price(BigDecimal.valueOf(10.0))
+      .build());
+    var expectedProduct = ProductDTO.builder()
+      .id(productCreateDTO.getId())
+      .name(productCreateDTO.getName())
+      .price(productCreateDTO.getPrice())
+      .build();
+    assertEquals(productCreateDTO, expectedProduct);
   }
 
   @Test
-  void updateProduct() {
-    var productCreateDTO = new ProductCreateDTO();
-    productCreateDTO.setName("Product");
-    productCreateDTO.setPrice(BigDecimal.valueOf(22.0));
-    ProductDTO createdProduct = defaultProductService.create(productCreateDTO);
-    var productUpdateDTO = new ProductUpdateDTO();
-    productUpdateDTO.setName("Updated Product");
-    productUpdateDTO.setPrice(BigDecimal.valueOf(22.2));
-    ProductDTO productUpdate = defaultProductService.update(createdProduct.getId(), productUpdateDTO);
-    assertEquals(createdProduct.getId(), productUpdate.getId());
-    assertEquals("Updated Product", productUpdate.getName());
-    assertEquals(BigDecimal.valueOf(22.2), productUpdate.getPrice());
+  void updateProduct_ThrowsObjectNotFoundException() {
+    var productCreateDTO = productService.create(ProductCreateDTO.createBuilder()
+      .name("Product")
+      .price(BigDecimal.valueOf(22.0))
+      .build());
+    var productUpdateDTO = ProductUpdateDTO.updateBuilder()
+      .id(2L)
+      .name("Updated Product")
+      .price(BigDecimal.valueOf(22.2))
+      .build();
+    var updatedProduct = productService.update(productCreateDTO.getId(), productUpdateDTO);
+    var expectedProduct = ProductDTO.builder()
+      .id(updatedProduct.getId())
+      .name(updatedProduct.getName())
+      .price(updatedProduct.getPrice())
+      .build();
+    var fakeId = 999L;
+    assertEquals(updatedProduct.getId(), expectedProduct.getId());
+    assertEquals(updatedProduct.getName(), expectedProduct.getName());
+    assertEquals(updatedProduct.getPrice(), expectedProduct.getPrice());
+    assertThrows(ObjectNotFoundException.class, () -> productService.update(fakeId, productUpdateDTO));
   }
 
   @Test
   void findAllProducts() {
     var productsCreate = List.of
-      (defaultProductService.create(new ProductCreateDTO("Product", BigDecimal.valueOf(22.2))),
-        defaultProductService.create(new ProductCreateDTO("Product 2", BigDecimal.valueOf(10.2))));
-    var findProduct = defaultProductService.findAll();
-    assertEquals(productsCreate, findProduct);
+      (productService.create(ProductCreateDTO.createBuilder()
+          .name("Product")
+          .price(BigDecimal.valueOf(22.2))
+          .build()),
+        productService.create(ProductCreateDTO.createBuilder()
+          .name("Product 2")
+          .price(BigDecimal.valueOf(10.2))
+          .build()));
+    assertEquals(productsCreate, productService.findAll());
   }
 
   @Test
   void deleteProduct() {
-    var productCreate = defaultProductService.create(new ProductCreateDTO("Product", BigDecimal.valueOf(22.2)));
-    defaultProductService.delete(productCreate.getId());
-    assertThrows(ObjectNotFoundException.class, () -> defaultProductService.findById(productCreate.getId()));
+    var productCreate = productService.create(ProductCreateDTO.createBuilder()
+      .name("Product")
+      .price(BigDecimal.valueOf(22.2))
+      .build());
+    productService.delete(productCreate.getId());
+    assertThrows(ObjectNotFoundException.class, () -> productService.findById(productCreate.getId()));
   }
 
   @Test
   void findByIdProduct() {
-    var productCreate = defaultProductService.create(new ProductCreateDTO("Product", BigDecimal.valueOf(22.2)));
-    defaultProductService.findById(productCreate.getId());
-    assertEquals(productCreate, defaultProductService.findById(productCreate.getId()));
+    var productCreate = productService.create(ProductCreateDTO.createBuilder()
+      .name("Product")
+      .price(BigDecimal.valueOf(22.2))
+      .build());
+    assertEquals(productCreate, productService.findById(productCreate.getId()));
   }
 }
