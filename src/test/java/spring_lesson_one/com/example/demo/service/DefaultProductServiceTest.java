@@ -28,7 +28,7 @@ class DefaultProductServiceTest extends ContainerEnvironment {
 
   @Test
   void createProduct() {
-    var productCreateDTO = productService.create(ProductCreateDTO.createBuilder()
+    var productCreateDTO = productService.create(ProductCreateDTO.builder()
       .name("Product")
       .price(BigDecimal.valueOf(10.0))
       .build());
@@ -42,11 +42,11 @@ class DefaultProductServiceTest extends ContainerEnvironment {
 
   @Test
   void updateProduct_ThrowsObjectNotFoundException() {
-    var productCreateDTO = productService.create(ProductCreateDTO.createBuilder()
+    var productCreateDTO = productService.create(ProductCreateDTO.builder()
       .name("Product")
       .price(BigDecimal.valueOf(22.0))
       .build());
-    var productUpdateDTO = ProductUpdateDTO.updateBuilder()
+    var productUpdateDTO = ProductUpdateDTO.builder()
       .id(2L)
       .name("Updated Product")
       .price(BigDecimal.valueOf(22.2))
@@ -67,11 +67,11 @@ class DefaultProductServiceTest extends ContainerEnvironment {
   @Test
   void findAllProducts() {
     var productsCreate = List.of
-      (productService.create(ProductCreateDTO.createBuilder()
+      (productService.create(ProductCreateDTO.builder()
           .name("Product")
           .price(BigDecimal.valueOf(22.2))
           .build()),
-        productService.create(ProductCreateDTO.createBuilder()
+        productService.create(ProductCreateDTO.builder()
           .name("Product 2")
           .price(BigDecimal.valueOf(10.2))
           .build()));
@@ -80,7 +80,7 @@ class DefaultProductServiceTest extends ContainerEnvironment {
 
   @Test
   void deleteProduct() {
-    var productCreate = productService.create(ProductCreateDTO.createBuilder()
+    var productCreate = productService.create(ProductCreateDTO.builder()
       .name("Product")
       .price(BigDecimal.valueOf(22.2))
       .build());
@@ -90,7 +90,7 @@ class DefaultProductServiceTest extends ContainerEnvironment {
 
   @Test
   void findByIdProduct() {
-    var productCreate = productService.create(ProductCreateDTO.createBuilder()
+    var productCreate = productService.create(ProductCreateDTO.builder()
       .name("Product")
       .price(BigDecimal.valueOf(22.2))
       .build());

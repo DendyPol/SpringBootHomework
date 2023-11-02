@@ -16,35 +16,35 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class DefaultProductService implements ProductService {
-  private final ProductRepository productDAO;
+  private final ProductRepository productRepository;
   private final ModelMapper modelMapper;
 
   public List<ProductDTO> findAll() {
-    return productDAO.findAll().stream()
+    return productRepository.findAll().stream()
       .map(product -> modelMapper.map(product, ProductDTO.class))
       .collect(Collectors.toList());
   }
 
   public ProductDTO findById(long id) {
-    var product = productDAO.findById(id)
+    var product = productRepository.findById(id)
       .orElseThrow(() -> new ObjectNotFoundException(String.format("Product c ID %d не найден", id)));
     return modelMapper.map(product, ProductDTO.class);
   }
 
   public ProductDTO create(ProductCreateDTO productCreateDTO) {
     var product = modelMapper.map(productCreateDTO, Product.class);
-    return modelMapper.map(productDAO.save(product), ProductDTO.class);
+    return modelMapper.map(productRepository.save(product), ProductDTO.class);
   }
 
   public void delete(long id) {
-    productDAO.findById(id).orElseThrow(() -> new ObjectNotFoundException(String.format("Product c ID %d не найден", id)));
-    productDAO.deleteById(id);
+    productRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException(String.format("Product c ID %d не найден", id)));
+    productRepository.deleteById(id);
   }
 
   public ProductDTO update(Long id, ProductUpdateDTO productUpdateDTO) {
-    var product = productDAO.findById(id)
+    var product = productRepository.findById(id)
       .orElseThrow(() -> new ObjectNotFoundException(String.format("Product c ID %d не найден", id)));
     modelMapper.map(productUpdateDTO, product);
-    return modelMapper.map(productDAO.save(product), ProductDTO.class);
+    return modelMapper.map(productRepository.save(product), ProductDTO.class);
   }
 }

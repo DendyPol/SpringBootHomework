@@ -1,6 +1,6 @@
 create table product
 (
-  id    bigint primary key, --create nextval('product_id_seq'::regclass)
+  id    bigint primary key,
   name  varchar not null,
   price numeric not null
 );
