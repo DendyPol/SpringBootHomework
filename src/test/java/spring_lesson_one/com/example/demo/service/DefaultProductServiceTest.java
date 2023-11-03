@@ -1,5 +1,6 @@
 package spring_lesson_one.com.example.demo.service;
 
+import org.assertj.core.api.WithAssertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,15 +15,15 @@ import spring_lesson_one.com.example.demo.exception.ObjectNotFoundException;
 import spring_lesson_one.com.example.demo.service.config.ContainerEnvironment;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = DemoApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class DefaultProductServiceTest extends ContainerEnvironment {
+class DefaultProductServiceTest extends ContainerEnvironment implements WithAssertions {
   @Autowired
   ProductService productService;
 
@@ -41,7 +42,7 @@ class DefaultProductServiceTest extends ContainerEnvironment {
   }
 
   @Test
-  void updateProduct_ThrowsObjectNotFoundException() {
+  void updateProduct() {
     var productCreateDTO = productService.create(ProductCreateDTO.builder()
       .name("Product")
       .price(BigDecimal.valueOf(22.0))
@@ -57,11 +58,19 @@ class DefaultProductServiceTest extends ContainerEnvironment {
       .name(updatedProduct.getName())
       .price(updatedProduct.getPrice())
       .build();
-    var fakeId = 999L;
     assertEquals(updatedProduct.getId(), expectedProduct.getId());
     assertEquals(updatedProduct.getName(), expectedProduct.getName());
     assertEquals(updatedProduct.getPrice(), expectedProduct.getPrice());
-    assertThrows(ObjectNotFoundException.class, () -> productService.update(fakeId, productUpdateDTO));
+  }
+
+  @Test
+  void updateProduct_nonexistent_throwsObjectNotFoundException() {
+    var productUpdateDTO = ProductUpdateDTO.builder()
+      .id(989898L)
+      .name("Product")
+      .price(BigDecimal.valueOf(22.2))
+      .build();
+    assertThrows(ObjectNotFoundException.class, () -> productService.update(989898L, productUpdateDTO));
   }
 
   @Test
@@ -85,15 +94,28 @@ class DefaultProductServiceTest extends ContainerEnvironment {
       .price(BigDecimal.valueOf(22.2))
       .build());
     productService.delete(productCreate.getId());
+    assertTrue(productService.findAll().isEmpty());
     assertThrows(ObjectNotFoundException.class, () -> productService.findById(productCreate.getId()));
+    assertThrows(ObjectNotFoundException.class, () -> productService.findById(989898L));
+  }
+
+  @Test
+  void deleteProduct_nonexistent_throwsObjectNotFoundException() {
+    assertThrows(ObjectNotFoundException.class, () -> productService.findById(989898L));
   }
 
   @Test
   void findByIdProduct() {
+    Comparator<BigDecimal> comparator = BigDecimal::compareTo;
     var productCreate = productService.create(ProductCreateDTO.builder()
       .name("Product")
       .price(BigDecimal.valueOf(22.2))
       .build());
-    assertEquals(productCreate, productService.findById(productCreate.getId()));
+    assertEquals(0, comparator.compare(productCreate.getPrice(), productService.findById(productCreate.getId()).getPrice()));
+  }
+
+  @Test
+  void findByIdProduct_nonexistent_throwsObjectNotFoundException() {
+    assertThrows(ObjectNotFoundException.class, () -> productService.findById(989898L));
   }
 }
