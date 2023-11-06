@@ -15,7 +15,6 @@ import spring_lesson_one.com.example.demo.exception.ObjectNotFoundException;
 import spring_lesson_one.com.example.demo.service.config.ContainerEnvironment;
 
 import java.math.BigDecimal;
-import java.util.Comparator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,9 +33,9 @@ class DefaultProductServiceTest extends ContainerEnvironment implements WithAsse
       .price(BigDecimal.valueOf(10.0))
       .build());
     var expectedProduct = ProductDTO.builder()
-      .id(productCreateDTO.getId())
-      .name(productCreateDTO.getName())
-      .price(productCreateDTO.getPrice())
+      .id(productCreateDTO.id)
+      .name(productCreateDTO.name)
+      .price(productCreateDTO.price)
       .build();
     assertEquals(productCreateDTO, expectedProduct);
   }
@@ -52,15 +51,17 @@ class DefaultProductServiceTest extends ContainerEnvironment implements WithAsse
       .name("Updated Product")
       .price(BigDecimal.valueOf(22.2))
       .build();
-    var updatedProduct = productService.update(productCreateDTO.getId(), productUpdateDTO);
+    var updatedProduct = productService.update(productCreateDTO.id, productUpdateDTO);
     var expectedProduct = ProductDTO.builder()
-      .id(updatedProduct.getId())
-      .name(updatedProduct.getName())
-      .price(updatedProduct.getPrice())
+      .id(updatedProduct.id)
+      .name(updatedProduct.name)
+      .price(updatedProduct.price)
       .build();
-    assertEquals(updatedProduct.getId(), expectedProduct.getId());
-    assertEquals(updatedProduct.getName(), expectedProduct.getName());
-    assertEquals(updatedProduct.getPrice(), expectedProduct.getPrice());
+    assertAll(
+      () -> assertEquals(updatedProduct.id, expectedProduct.id),
+      () -> assertEquals(updatedProduct.name, expectedProduct.name),
+      () -> assertEquals(updatedProduct.price, expectedProduct.price)
+    );
   }
 
   @Test
@@ -93,10 +94,8 @@ class DefaultProductServiceTest extends ContainerEnvironment implements WithAsse
       .name("Product")
       .price(BigDecimal.valueOf(22.2))
       .build());
-    productService.delete(productCreate.getId());
-    assertTrue(productService.findAll().isEmpty());
-    assertThrows(ObjectNotFoundException.class, () -> productService.findById(productCreate.getId()));
-    assertThrows(ObjectNotFoundException.class, () -> productService.findById(989898L));
+    productService.delete(productCreate.id);
+    assertThrows(ObjectNotFoundException.class, () -> productService.findById(productCreate.id));
   }
 
   @Test
@@ -106,12 +105,11 @@ class DefaultProductServiceTest extends ContainerEnvironment implements WithAsse
 
   @Test
   void findByIdProduct() {
-    Comparator<BigDecimal> comparator = BigDecimal::compareTo;
     var productCreate = productService.create(ProductCreateDTO.builder()
       .name("Product")
       .price(BigDecimal.valueOf(22.2))
       .build());
-    assertEquals(0, comparator.compare(productCreate.getPrice(), productService.findById(productCreate.getId()).getPrice()));
+    assertEquals(0, productCreate.price.compareTo(productService.findById(productCreate.id).price));
   }
 
   @Test

@@ -42,9 +42,9 @@ public class DefaultProductService implements ProductService {
   }
 
   public ProductDTO update(Long id, ProductUpdateDTO productUpdateDTO) {
-    var product = productRepository.findById(id)
-      .orElseThrow(() -> new ObjectNotFoundException(String.format("Product c ID %d не найден", id)));
+    var product = findById(id);
     modelMapper.map(productUpdateDTO, product);
-    return modelMapper.map(productRepository.save(product), ProductDTO.class);
+    var updatedProduct = productRepository.save(modelMapper.map(product, Product.class));
+    return modelMapper.map(updatedProduct, ProductDTO.class);
   }
 }
