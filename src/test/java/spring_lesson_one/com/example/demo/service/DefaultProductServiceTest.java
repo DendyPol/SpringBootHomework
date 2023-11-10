@@ -15,6 +15,7 @@ import spring_lesson_one.com.example.demo.exception.ObjectNotFoundException;
 import spring_lesson_one.com.example.demo.service.config.ContainerEnvironment;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,6 +39,7 @@ class DefaultProductServiceTest extends ContainerEnvironment implements WithAsse
       .price(productCreateDTO.price)
       .build();
     assertEquals(productCreateDTO, expectedProduct);
+    assertEquals(productCreateDTO.hashCode(), expectedProduct.hashCode());
   }
 
   @Test
@@ -58,9 +60,8 @@ class DefaultProductServiceTest extends ContainerEnvironment implements WithAsse
       .price(updatedProduct.price)
       .build();
     assertAll(
-      () -> assertEquals(updatedProduct.id, expectedProduct.id),
-      () -> assertEquals(updatedProduct.name, expectedProduct.name),
-      () -> assertEquals(updatedProduct.price, expectedProduct.price)
+      () -> assertEquals(updatedProduct, expectedProduct),
+      () -> assertEquals(updatedProduct.hashCode(), expectedProduct.hashCode())
     );
   }
 
@@ -71,7 +72,7 @@ class DefaultProductServiceTest extends ContainerEnvironment implements WithAsse
       .name("Product")
       .price(BigDecimal.valueOf(22.2))
       .build();
-    assertThrows(ObjectNotFoundException.class, () -> productService.update(989898L, productUpdateDTO));
+    assertThrows(ObjectNotFoundException.class, () -> productService.update(productUpdateDTO.id, productUpdateDTO));
   }
 
   @Test
@@ -79,11 +80,11 @@ class DefaultProductServiceTest extends ContainerEnvironment implements WithAsse
     var productsCreate = List.of
       (productService.create(ProductCreateDTO.builder()
           .name("Product")
-          .price(BigDecimal.valueOf(22.2))
+          .price(BigDecimal.valueOf(22.2).setScale(2, RoundingMode.HALF_UP))
           .build()),
         productService.create(ProductCreateDTO.builder()
           .name("Product 2")
-          .price(BigDecimal.valueOf(10.2))
+          .price(BigDecimal.valueOf(10.2).setScale(2, RoundingMode.HALF_UP))
           .build()));
     assertEquals(productsCreate, productService.findAll());
   }
