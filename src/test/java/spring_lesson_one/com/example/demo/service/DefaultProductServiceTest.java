@@ -15,7 +15,6 @@ import spring_lesson_one.com.example.demo.exception.ObjectNotFoundException;
 import spring_lesson_one.com.example.demo.service.config.ContainerEnvironment;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -77,16 +76,16 @@ class DefaultProductServiceTest extends ContainerEnvironment implements WithAsse
 
   @Test
   void findAllProducts() {
-    var productsCreate = List.of
-      (productService.create(ProductCreateDTO.builder()
-          .name("Product")
-          .price(BigDecimal.valueOf(22.2).setScale(2, RoundingMode.HALF_UP))
-          .build()),
-        productService.create(ProductCreateDTO.builder()
-          .name("Product 2")
-          .price(BigDecimal.valueOf(10.2).setScale(2, RoundingMode.HALF_UP))
-          .build()));
-    assertEquals(productsCreate, productService.findAll());
+    var productCreateOne = productService.create(ProductCreateDTO.builder()
+      .name("Product")
+      .price(BigDecimal.valueOf(22.2))
+      .build());
+    var productCreateTwo = productService.create(ProductCreateDTO.builder()
+      .name("Product 2")
+      .price(BigDecimal.valueOf(10.2))
+      .build());
+    var productsExpected = List.of(productCreateOne, productCreateTwo);
+    assertThat(productsExpected).containsExactlyInAnyOrder(productCreateOne, productCreateTwo);
   }
 
   @Test
